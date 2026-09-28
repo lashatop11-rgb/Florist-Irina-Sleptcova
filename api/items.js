@@ -1,10 +1,11 @@
-// GET /api/items — bouquets that are in stock right now (read by the site).
+// GET /api/items — what is in the studio right now: ready bouquets and flowers from the fresh delivery.
 import { listItems } from './_lib.js';
 
 export default async function handler(req, res) {
   try {
     const items = (await listItems()).map((it) => ({
       id: it.id,
+      kind: it.kind || 'bouquet',
       title: it.title,
       note: it.note || '',
       price: it.price,

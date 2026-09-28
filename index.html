@@ -782,6 +782,34 @@
   }
   .stock-tg:hover{border-color:var(--accent); background:color-mix(in srgb, var(--accent-soft) 18%, transparent);}
   .stock-tg svg{width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .stock-block + .stock-block{margin-top:56px;}
+  .stock-sub{display:flex; align-items:baseline; justify-content:center; flex-wrap:wrap; gap:6px 14px; margin-bottom:22px; text-align:center;}
+  .stock-sub h3{font-size:1.5rem; font-style:italic;}
+  .stock-sub span{font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--gold); font-weight:600;}
+  .fresh-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 200px)); justify-content:center; gap:16px;}
+  .fresh-card{
+    display:flex; flex-direction:column; overflow:hidden; border-radius:20px;
+    background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow);
+    transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    animation:tileIn .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 50ms);
+  }
+  .fresh-card:hover{transform:translateY(-4px);}
+  .fresh-card.picked{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent), var(--shadow);}
+  .fresh-card .stock-ph{aspect-ratio:1;}
+  .fresh-body{display:flex; flex-direction:column; gap:3px; flex:1; padding:12px 14px 0;}
+  .fresh-body h4{font-family:'Playfair Display', Georgia, serif; font-style:italic; font-weight:500; font-size:1rem; line-height:1.3;}
+  .fresh-price{font-size:0.8rem; font-weight:600; color:var(--accent);}
+  .fresh-note{font-size:0.75rem; line-height:1.45; color:var(--ink-soft);}
+  .fresh-pick{
+    appearance:none; cursor:pointer; margin:12px; padding:9px 10px; border-radius:999px;
+    border:1px dashed color-mix(in srgb, var(--ink) 28%, transparent); background:transparent; color:var(--ink);
+    font:inherit; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;
+    transition:background .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .fresh-pick:hover{border-color:var(--accent); color:var(--accent);}
+  .fresh-pick[aria-pressed="true"]{background:var(--accent); color:var(--on-accent); border:1px solid var(--accent);}
+  .fresh-bar{display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:12px 18px; margin-top:26px; text-align:center;}
+  .fresh-bar span{font-size:0.88rem; color:var(--ink-soft);}
 
   /* ---------- COMPACT PHONE LAYOUT ---------- */
   .g-more-wrap{text-align:center;}
@@ -818,6 +846,15 @@
     .stock-grid::-webkit-scrollbar{display:none;}
     .stock-card{flex:0 0 min(72%, 260px); scroll-snap-align:start;}
     .stock-card:only-child{flex-basis:min(86%, 300px); margin:0 auto;}
+    .stock-block + .stock-block{margin-top:36px;}
+    .stock-sub{margin-bottom:14px;}
+    .stock-sub h3{font-size:1.3rem;}
+    .fresh-grid{display:flex; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; gap:10px; margin:0 -18px; padding:4px 18px 14px; scroll-padding:0 18px; scrollbar-width:none;}
+    .fresh-grid::-webkit-scrollbar{display:none;}
+    .fresh-card{flex:0 0 min(44%, 190px); scroll-snap-align:start;}
+    .fresh-card:hover{transform:none;}
+    .fresh-bar{margin-top:12px; gap:8px;}
+    .fresh-bar .btn{width:100%;}
 
     .g-filters{flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; margin:-14px -18px 20px; padding:2px 18px 6px; scrollbar-width:none;}
     .g-filters::-webkit-scrollbar{display:none;}
@@ -983,11 +1020,22 @@
 <section id="stock" class="tinted" hidden aria-labelledby="stockTitle">
   <div class="wrap">
     <div class="section-head reveal">
-      <div class="section-eyebrow"><span class="live-dot" aria-hidden="true"></span>В наличии сейчас</div>
-      <h2 id="stockTitle">Готовые букеты</h2>
-      <p>Только что собраны — можно забрать сегодня или заказать доставку. Забронируйте, пока букет не ушёл.</p>
+      <div class="section-eyebrow"><span class="live-dot" aria-hidden="true"></span>В мастерской сейчас</div>
+      <h2 id="stockTitle">В наличии</h2>
+      <p>Готовые букеты можно забрать сегодня, а из свежей поставки соберём букет под вас.</p>
     </div>
-    <div class="stock-grid" id="stockGrid"></div>
+    <div class="stock-block" id="bouquetBlock" hidden>
+      <div class="stock-sub"><h3>Готовые букеты</h3><span>можно забрать сегодня</span></div>
+      <div class="stock-grid" id="stockGrid"></div>
+    </div>
+    <div class="stock-block" id="freshBlock" hidden>
+      <div class="stock-sub"><h3>Свежая поставка</h3><span id="freshDate"></span></div>
+      <div class="fresh-grid" id="freshGrid"></div>
+      <div class="fresh-bar">
+        <span id="freshHint"></span>
+        <button type="button" class="btn btn-primary" id="freshGo"></button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1638,7 +1686,7 @@
     lbImg.classList.add('swap');
     setTimeout(()=>{
       lbImg.src = im.src; lbImg.alt = im.alt;
-      lbCap.textContent = ($('.g-cap', t) || $('h3', t)).textContent;
+      lbCap.textContent = $('.g-cap, h3, h4', t).textContent;
       lbCount.textContent = `${cur + 1} / ${lbTiles.length}`;
       lbImg.classList.remove('swap');
     }, lb.classList.contains('open') ? 180 : 0);
@@ -1731,14 +1779,72 @@
     ph.addEventListener('click', ()=> openLb(card, $$('.stock-card', stockGrid)));
     return card;
   }
+  // «Свежая поставка»: pick flowers → they go into the order wishes
+  const bouquetBlock = $('#bouquetBlock'), freshBlock = $('#freshBlock'), freshGrid = $('#freshGrid');
+  const picked = new Set();
+  let freshItems = [];
+  const lcFirst = s => s.charAt(0).toLowerCase() + s.slice(1);
+  function freshCard(it, i){
+    const card = el('article', 'fresh-card');
+    card.style.setProperty('--i', i);
+    const ph = el('button', 'stock-ph');
+    ph.type = 'button';
+    ph.setAttribute('aria-label', 'Открыть фото: ' + it.title);
+    const img = el('img');
+    img.src = it.photo; img.alt = 'Свежие цветы: ' + it.title; img.loading = 'lazy';
+    ph.append(img);
+    const body = el('div', 'fresh-body');
+    body.append(el('h4', null, it.title));
+    if(it.price) body.append(el('span', 'fresh-price', rub(it.price) + ' / шт'));
+    if(it.note) body.append(el('span', 'fresh-note', it.note));
+    const pick = el('button', 'fresh-pick');
+    pick.type = 'button';
+    const sync = ()=>{
+      const on = picked.has(it.id);
+      pick.setAttribute('aria-pressed', on);
+      pick.textContent = on ? '✓ В букете' : '+ В букет';
+      card.classList.toggle('picked', on);
+    };
+    pick.addEventListener('click', ()=>{ picked.has(it.id) ? picked.delete(it.id) : picked.add(it.id); sync(); updateFreshBar(); });
+    sync();
+    ph.addEventListener('click', ()=> openLb(card, $$('.fresh-card', freshGrid)));
+    card.append(ph, body, pick);
+    return card;
+  }
+  const pickedNames = () => freshItems.filter(it => picked.has(it.id)).map(it => it.title);
+  function updateFreshBar(){
+    const n = pickedNames().length;
+    $('#freshHint').textContent = n ? `Выбрано: ${n}` : 'Отметьте цветы — соберём из них букет';
+    $('#freshGo').textContent = n ? 'Собрать букет из выбранных →' : 'Собрать букет из свежих →';
+  }
+  $('#freshGo').addEventListener('click', ()=>{
+    const names = pickedNames().map(lcFirst);
+    const line = names.length ? 'Хочу букет из свежей поставки: ' + names.join(', ') + '.' : 'Хочу букет из свежей поставки.';
+    const rest = fWishes.value.split('\n').filter(l => l.trim() && !l.startsWith('Хочу букет из свежей поставки'));
+    fWishes.value = [...rest, line].join('\n');
+    render();
+    $('#order').scrollIntoView({behavior:'smooth'});
+    setTimeout(()=> fWishes.focus({preventScroll:true}), 700);
+    toast('Добавили цветы в пожелания ✿');
+  });
   function renderStock(items){
-    const has = items.length > 0;
-    stockSec.hidden = !has;
-    $$('a[href="#stock"]').forEach(a => a.hidden = !has);
+    const bouquets = items.filter(it => it.kind !== 'flower'), flowers = items.filter(it => it.kind === 'flower');
+    stockSec.hidden = !items.length;
+    bouquetBlock.hidden = !bouquets.length;
+    freshBlock.hidden = !flowers.length;
+    $$('a[href="#stock"]').forEach(a => a.hidden = !items.length);
     const sig = JSON.stringify(items);
-    if(sig === stockGrid.dataset.sig) return;
-    stockGrid.dataset.sig = sig;
-    stockGrid.replaceChildren(...items.map(stockCard));
+    if(sig === stockSec.dataset.sig) return;
+    stockSec.dataset.sig = sig;
+    stockGrid.replaceChildren(...bouquets.map(stockCard));
+    freshItems = flowers;
+    [...picked].forEach(id => { if(!flowers.some(f => f.id === id)) picked.delete(id); });
+    freshGrid.replaceChildren(...flowers.map(freshCard));
+    if(flowers.length){
+      const d = new Date(Math.max(...flowers.map(f => f.createdAt)));
+      $('#freshDate').textContent = 'поставка от ' + d.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+    }
+    updateFreshBar();
   }
   async function loadStock(){
     try{
