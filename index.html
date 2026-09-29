@@ -864,7 +864,7 @@
   .rev-ava{width:38px; height:38px; flex:none; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg, var(--accent), var(--gold)); color:var(--on-accent); font-family:'Playfair Display', Georgia, serif; font-style:italic; font-size:1rem;}
   .rev-who b{display:block; font-family:'Playfair Display', Georgia, serif; font-style:italic; font-weight:500;}
   .rev-who small{display:block; font-size:0.74rem; color:var(--ink-soft); margin-top:2px;}
-  .rev-foot{text-align:center; margin-top:30px;}
+  .rev-foot{display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:30px;}
   #reviews.is-empty{padding:72px 0;}
   #reviews.is-empty .section-head{margin-bottom:24px;}
   #reviews.is-empty .rev-foot{margin-top:0;}
@@ -930,6 +930,9 @@
     .rev-card:only-child{flex-basis:100%;}
     .rev-foot{margin-top:12px;}
     #reviews.is-empty{padding:44px 0;}
+    .rev-foot.two{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+    .rev-foot.two .btn{padding:14px 8px; font-size:0.64rem; letter-spacing:0.06em; gap:6px;}
+    .rev-foot.two .rev-long{display:none;}
     #reviews.is-empty .section-head{margin-bottom:18px;}
     .addr-actions .btn{flex:1 1 auto; padding:13px 14px; font-size:0.66rem; letter-spacing:0.08em;}
     .map-box{height:280px; border-radius:18px;}
@@ -1282,7 +1285,13 @@
       <p class="rev-summary" id="revSummary">Расскажите о букете — после проверки отзыв появится здесь.</p>
     </div>
     <div class="rev-grid" id="revGrid"></div>
-    <div class="rev-foot"><button type="button" class="btn btn-primary" id="revBtn" data-review>Оставить отзыв</button></div>
+    <div class="rev-foot" id="revFoot">
+      <button type="button" class="btn btn-primary" id="revBtn" data-review>Оставить отзыв</button>
+      <a class="btn btn-ghost" id="revTg" href="https://t.me/" target="_blank" rel="noopener" hidden>
+        <svg viewBox="0 0 24 24"><path d="m21 2-19 9 6 2 2 6 3-4 6 4Z"/></svg>
+        <span><span class="rev-long">Все отзывы </span>в Telegram</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -2275,11 +2284,15 @@
 
   // ---------- reviews ----------
   const revSec = $('#reviews'), revGrid = $('#revGrid');
-  function renderReviews(list){
-    const sig = JSON.stringify(list);
+  function renderReviews(list, channel){
+    const sig = JSON.stringify([list, channel]);
     if(sig === revSec.dataset.sig) return;
     revSec.dataset.sig = sig;
     const empty = !list.length;
+    const revTg = $('#revTg');
+    revTg.hidden = empty || !channel;
+    $('#revFoot').classList.toggle('two', !revTg.hidden);
+    if(channel) revTg.href = channel;
     revSec.classList.toggle('is-empty', empty);
     $('#revBtn').className = 'btn ' + (empty ? 'btn-primary' : 'btn-ghost');
     $('#revTitle').textContent = empty ? 'Как вам наши цветы?' : 'Что говорят клиенты';
@@ -2364,7 +2377,7 @@
       const arr = v => Array.isArray(v) ? v : [];
       renderStock(arr(j.items));
       setWorks(arr(j.works));
-      renderReviews(arr(j.reviews));
+      renderReviews(arr(j.reviews), /^https:\/\/t\.me\/\w+$/.test(j.reviewsChannel || '') ? j.reviewsChannel : '');
       renderNotices(j);
       if(j.metrika) loadMetrika(String(j.metrika));
     }catch(_){ /* opened as a local file or offline — live blocks just stay hidden */ }
