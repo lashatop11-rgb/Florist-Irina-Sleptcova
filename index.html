@@ -8,6 +8,13 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Флорист Ирина Слепцова — авторская флористика в Тучково">
 <meta property="og:description" content="Букеты, свадебная флористика и оформление праздников. Бесплатная доставка по Тучково.">
+<meta property="og:site_name" content="Флорист Ирина Слепцова">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image" content="https://florist-irina-sleptcova.vercel.app/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Флорист Ирина Слепцова · +7 (926) 467-80-00 · Тучково, Восточный мкр., 1А">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#faf6f3">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cellipse cx='50' cy='28' rx='16' ry='22' fill='%23c0455f'/%3E%3Cellipse cx='50' cy='72' rx='16' ry='22' fill='%23c0455f'/%3E%3Cellipse cx='28' cy='50' rx='22' ry='16' fill='%23e7b7c2'/%3E%3Cellipse cx='72' cy='50' rx='22' ry='16' fill='%23e7b7c2'/%3E%3Ccircle cx='50' cy='50' r='13' fill='%23b78a4a'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
@@ -17,11 +24,17 @@
   "@type":"Florist",
   "name":"Флорист Ирина Слепцова",
   "telephone":"+7-926-467-80-00",
+  "url":"https://florist-irina-sleptcova.vercel.app/",
+  "image":"https://florist-irina-sleptcova.vercel.app/og.jpg",
+  "priceRange":"₽₽",
+  "areaServed":"Тучково",
+  "geo":{"@type":"GeoCoordinates","latitude":55.602085,"longitude":36.483554},
   "address":{
     "@type":"PostalAddress",
     "streetAddress":"Восточный микрорайон, д. 1А",
     "addressLocality":"пгт. Тучково",
     "addressRegion":"Московская область",
+    "postalCode":"143130",
     "addressCountry":"RU"
   },
   "sameAs":[
@@ -811,6 +824,123 @@
   .fresh-bar{display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:12px 18px; margin-top:26px; text-align:center;}
   .fresh-bar span{font-size:0.88rem; color:var(--ink-soft);}
 
+
+  /* ---------- NOTICES (banner / pause from the bot) ---------- */
+  .notice{position:relative; z-index:40; color:var(--on-accent); background:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--gold)));}
+  .notice.pause{background:var(--ink); color:var(--bg);}
+  .notice-in{display:flex; align-items:center; justify-content:center; gap:10px; padding-top:9px; padding-bottom:9px; font-size:0.84rem; font-weight:500; line-height:1.45; text-align:center;}
+  .notice-in b{font-weight:600;}
+  .notice-text{min-width:0;}
+  .notice-x{flex:none; width:28px; height:28px; margin-right:-6px; border:0; border-radius:50%; background:transparent; color:inherit; opacity:.7; cursor:pointer; display:grid; place-items:center; padding:0;}
+  .notice-x:hover{opacity:1; background:rgba(255,255,255,0.16);}
+  .notice-x svg{width:14px; height:14px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round;}
+
+  /* stock: badges, discount, one-tap reservation */
+  .stock-badges{position:absolute; top:12px; left:12px; right:12px; display:flex; flex-wrap:wrap; gap:6px;}
+  .stock-badges .stock-badge{position:static;}
+  .stock-badge.sale{background:var(--accent); color:var(--on-accent);}
+  .stock-prices{display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px;}
+  .stock-old{font-size:0.86rem; color:var(--ink-soft); text-decoration-thickness:1px;}
+  .stock-actions.three{grid-template-columns:1fr 46px 46px;}
+
+  /* gallery: works added through the bot */
+  .g-new{position:absolute; top:12px; left:12px; z-index:2; padding:5px 11px; border-radius:999px; background:var(--card); color:var(--accent); font-size:0.6rem; letter-spacing:0.14em; text-transform:uppercase; font-weight:600; box-shadow:var(--shadow);}
+
+  /* ---------- REVIEWS ---------- */
+  .rev-summary b{color:var(--gold); font-weight:600;}
+  .rev-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px;}
+  .rev-card{
+    position:relative; display:flex; flex-direction:column; gap:14px; padding:26px 24px 20px; border-radius:22px;
+    background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow);
+    animation:tileIn .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 60ms);
+  }
+  .rev-card::before{content:'“'; position:absolute; top:4px; right:20px; font-family:'Playfair Display', Georgia, serif; font-size:4.6rem; line-height:1; color:color-mix(in srgb, var(--accent) 22%, transparent); pointer-events:none;}
+  .rev-stars{color:var(--gold); letter-spacing:0.14em; font-size:0.95rem;}
+  .rev-text{margin:0; flex:1; font-size:0.92rem; line-height:1.7; font-weight:400; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:6; overflow:hidden;}
+  .rev-card.long{cursor:pointer;}
+  .rev-card.open .rev-text{display:block; -webkit-line-clamp:unset;}
+  .rev-toggle{align-self:flex-start; font-size:0.66rem; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; color:var(--accent);}
+  .rev-who{display:flex; align-items:center; gap:12px; padding-top:14px; border-top:1px solid var(--line);}
+  .rev-ava{width:38px; height:38px; flex:none; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg, var(--accent), var(--gold)); color:var(--on-accent); font-family:'Playfair Display', Georgia, serif; font-style:italic; font-size:1rem;}
+  .rev-who b{display:block; font-family:'Playfair Display', Georgia, serif; font-style:italic; font-weight:500;}
+  .rev-who small{display:block; font-size:0.74rem; color:var(--ink-soft); margin-top:2px;}
+  .rev-foot{text-align:center; margin-top:30px;}
+
+  /* order: send straight from the site */
+  .site-send{display:grid; gap:10px;}
+  .site-send .field-label{margin-bottom:0;}
+  .inp.bad{border-color:var(--accent); box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);}
+  .btn.is-sent{background:color-mix(in srgb, var(--accent-soft) 45%, var(--card)); color:var(--accent); box-shadow:none;}
+  .btn:disabled{opacity:.7; cursor:progress;}
+  .or{display:flex; align-items:center; gap:12px; margin:8px 0 0; font-size:0.66rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-soft); font-weight:600;}
+  .or::before, .or::after{content:''; flex:1; height:1px; background:var(--line);}
+  .preview-sub.three{grid-template-columns:repeat(3, minmax(0, 1fr));}
+  .preview-sub.three .btn{padding:13px 6px; font-size:0.64rem; letter-spacing:0.06em; gap:6px;}
+  .consent{margin:0; font-size:0.7rem; line-height:1.5; color:var(--ink-soft); text-align:center; font-weight:400;}
+  .consent a{color:inherit;}
+  .hp{position:absolute !important; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;}
+
+  /* ---------- MAP ---------- */
+  .addr-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;}
+  .map-box{margin-top:18px; height:340px; border-radius:22px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow); background:var(--bg-alt);}
+  .map-box iframe{display:block; width:100%; height:100%; border:0;}
+
+  .foot-links{display:flex; flex-wrap:wrap; gap:6px 18px;}
+  .foot-links a, .foot-links button{color:inherit; font:inherit; background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-decoration-color:color-mix(in srgb, currentColor 35%, transparent);}
+  .foot-links a:hover, .foot-links button:hover{color:var(--accent);}
+
+  /* ---------- DIALOG (бронь / отзыв) ---------- */
+  .dlg{padding:0; border:0; background:transparent; color:var(--ink); width:100%; max-width:min(480px, calc(100% - 24px)); max-height:calc(100dvh - 24px); overflow:visible;}
+  .dlg::backdrop{background:rgba(20,12,10,0.55); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);}
+  .dlg[open]{animation:dlgIn .35s cubic-bezier(.2,.8,.2,1);}
+  @keyframes dlgIn{from{opacity:0; transform:translateY(24px) scale(.98);}}
+  .dlg.fallback[open]{position:fixed; inset:0; margin:auto; z-index:400; height:fit-content;}
+  .dlg-card{position:relative; background:var(--card); border:1px solid var(--line); border-radius:26px; box-shadow:var(--shadow-lg); padding:30px 26px 22px; max-height:calc(100dvh - 24px); overflow:auto;}
+  .dlg-x{position:absolute; top:14px; right:14px; z-index:1; width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; display:grid; place-items:center; padding:0;}
+  .dlg-x svg{width:16px; height:16px; stroke:currentColor; stroke-width:1.8; fill:none; stroke-linecap:round;}
+  .dlg-head{display:flex; gap:16px; align-items:center; margin:0 34px 22px 0;}
+  .dlg-ph{width:76px; height:92px; flex:none; object-fit:cover; border-radius:14px; background:var(--bg-alt);}
+  .dlg-eyebrow{font-size:0.66rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--gold); font-weight:600;}
+  .dlg h3{font-size:1.4rem; font-style:italic; margin-top:6px; line-height:1.2;}
+  .dlg-sub{margin:8px 0 0; font-size:0.84rem; line-height:1.55; color:var(--ink-soft); font-weight:400;}
+  .dlg .field{margin-bottom:16px;}
+  .dlg-row.one{grid-template-columns:1fr;}
+  .dlg-err{margin:0 0 12px; font-size:0.82rem; line-height:1.5; color:var(--accent); font-weight:500;}
+  .dlg-err:empty{display:none;}
+  .dlg-send{width:100%;}
+  .dlg .consent{margin-top:12px;}
+  .stars{display:flex; gap:2px;}
+  .stars button{appearance:none; border:0; background:none; padding:2px 3px; cursor:pointer; font-size:1.9rem; line-height:1; color:color-mix(in srgb, var(--ink) 18%, transparent); transition:color .2s ease, transform .2s ease;}
+  .stars button.on{color:var(--gold);}
+  .stars button:hover{transform:scale(1.12);}
+  .dlg-done{text-align:center; padding:12px 6px 4px;}
+  .dlg-check{width:64px; height:64px; margin:0 auto 16px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg, var(--accent), var(--gold)); color:var(--on-accent); animation:pop .5s cubic-bezier(.2,.8,.2,1);}
+  .dlg-check svg{width:30px; height:30px; stroke:currentColor; stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round;}
+  .dlg-done p{color:var(--ink-soft); line-height:1.6; font-weight:400; margin:10px 0 22px;}
+  .dlg-done .btn{min-width:180px;}
+
+  @media (max-width:760px){
+    .notice-in{font-size:0.78rem; padding-top:8px; padding-bottom:8px; gap:8px;}
+    .rev-grid{display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; margin:0 -18px; padding:4px 18px 16px; scroll-padding:0 18px; scrollbar-width:none;}
+    .rev-grid::-webkit-scrollbar{display:none;}
+    .rev-card{flex:0 0 min(84%, 320px); scroll-snap-align:start; padding:22px 18px 16px;}
+    .rev-card:only-child{flex-basis:100%;}
+    .rev-foot{margin-top:12px;}
+    .addr-actions .btn{flex:1 1 auto; padding:13px 14px; font-size:0.66rem; letter-spacing:0.08em;}
+    .map-box{height:280px; border-radius:18px;}
+    .dlg-card{padding:24px 18px 16px; border-radius:22px;}
+    .dlg .row2{grid-template-columns:1fr; gap:0;}
+    .dlg-head{margin-bottom:16px;}
+    .dlg-ph{width:60px; height:72px;}
+    .dlg h3{font-size:1.2rem;}
+    .rev-text{-webkit-line-clamp:5;}
+    .preview-note{display:none;}
+    .preview-sub.three .btn{padding:12px 4px; font-size:0.6rem; letter-spacing:0.05em;}
+  }
+  @media (max-width:400px){
+    .preview-sub.three .btn svg{display:none;}
+  }
+
   /* ---------- COMPACT PHONE LAYOUT ---------- */
   .g-more-wrap{text-align:center;}
   .g-more{margin-top:18px;}
@@ -946,11 +1076,14 @@
     <a href="#services">Услуги</a>
     <a href="#gallery">Работы</a>
     <a href="#order">Собрать букет</a>
+    <a href="#reviews" hidden>Отзывы</a>
     <a href="#address">Адрес</a>
     <a href="#contact">Контакты</a>
   </div>
   <span class="progress" id="progress"></span>
 </header>
+
+<div id="notices"></div>
 
 <div class="quote-bar">
   <span id="quoteText" class="quote-text">Счастье — это держать в руках букет.</span>
@@ -1109,6 +1242,8 @@
       <button type="button" class="chip" aria-pressed="false" data-f="bouquet">Букеты <span class="cnt">4</span></button>
       <button type="button" class="chip" aria-pressed="false" data-f="box">В коробках <span class="cnt">5</span></button>
       <button type="button" class="chip" aria-pressed="false" data-f="basket">Корзины <span class="cnt">1</span></button>
+      <button type="button" class="chip" aria-pressed="false" data-f="wedding" hidden>Свадебные <span class="cnt">0</span></button>
+      <button type="button" class="chip" aria-pressed="false" data-f="mourning" hidden>Траурные <span class="cnt">0</span></button>
       <button type="button" class="chip" aria-pressed="false" data-f="xmas">Новогодние <span class="cnt">1</span></button>
     </div>
     <div class="gallery reveal" id="gallery-grid">
@@ -1134,12 +1269,24 @@
   </div>
 </section>
 
+<section id="reviews" hidden aria-labelledby="revTitle">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-eyebrow">Отзывы</div>
+      <h2 id="revTitle">Что говорят клиенты</h2>
+      <p class="rev-summary" id="revSummary"></p>
+    </div>
+    <div class="rev-grid" id="revGrid"></div>
+    <div class="rev-foot"><button type="button" class="btn btn-ghost" data-review>Оставить отзыв</button></div>
+  </div>
+</section>
+
 <section id="order">
   <div class="wrap">
     <div class="section-head reveal">
       <div class="section-eyebrow">Онлайн-заявка</div>
       <h2>Соберите свой букет</h2>
-      <p>Отметьте, что для вас важно, — сообщение соберётся само. Останется только отправить его в WhatsApp или Telegram.</p>
+      <p>Отметьте, что для вас важно, — заявка соберётся сама. Отправьте её Ирине прямо с сайта или в WhatsApp / Telegram.</p>
     </div>
     <div class="order-grid">
       <form class="order-form reveal" id="orderForm" autocomplete="on">
@@ -1196,11 +1343,22 @@
         </div>
         <div class="chat"><div class="bubble" id="bubble" aria-live="polite"></div></div>
         <div class="preview-actions">
-          <a class="btn btn-primary" id="sendWa" href="https://wa.me/79264678000" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24"><path d="M3.5 20.5 5 16.3A8.5 8.5 0 1 1 8 19.3Z"/><path d="M9 9.5c.3 2 2.2 4.2 5 5l1.2-1.3 2 1-.4 1.6c-3.6.4-8.4-3.8-8.6-7.4l1.6-.5 1 2Z"/></svg>
-            Отправить в WhatsApp
-          </a>
-          <div class="preview-sub">
+          <div class="site-send">
+            <label class="field-label" for="fPhone">Телефон для связи</label>
+            <input class="inp" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__">
+            <input class="hp" id="fHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button class="btn btn-primary" id="sendSite" type="button">
+              <svg viewBox="0 0 24 24"><path d="M4 12 20 4l-6 16-3-7Z"/><path d="m11 13 9-9"/></svg>
+              <span>Отправить заявку Ирине</span>
+            </button>
+            <p class="consent">Нажимая кнопку, вы соглашаетесь на <a href="/privacy.html" target="_blank" rel="noopener">обработку персональных данных</a>.</p>
+          </div>
+          <div class="or">или напишите сами</div>
+          <div class="preview-sub three">
+            <a class="btn btn-ghost" id="sendWa" href="https://wa.me/79264678000" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M3.5 20.5 5 16.3A8.5 8.5 0 1 1 8 19.3Z"/><path d="M9 9.5c.3 2 2.2 4.2 5 5l1.2-1.3 2 1-.4 1.6c-3.6.4-8.4-3.8-8.6-7.4l1.6-.5 1 2Z"/></svg>
+              WhatsApp
+            </a>
             <a class="btn btn-ghost" id="sendTg" href="https://t.me/lrinaSlepcova" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24"><path d="m21 2-19 9 6 2 2 6 3-4 6 4Z"/></svg>
               Telegram
@@ -1240,10 +1398,18 @@
           </div>
         </div>
 
-        <a class="btn btn-primary" href="https://yandex.ru/maps/org/florist_sleptsova_i_m_/106085531124?si=24ex61q8p39612feyemhg5238w" target="_blank" rel="noopener" style="margin-top:8px;">
-          <svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.7-6.5-11A6.5 6.5 0 0 1 12 3.5 6.5 6.5 0 0 1 18.5 10c0 5.3-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
-          Открыть на Яндекс Картах
-        </a>
+        <div class="addr-actions">
+          <a class="btn btn-primary" href="https://yandex.ru/maps/?rtext=~55.602085%2C36.483554&rtt=auto" target="_blank" rel="noopener" data-goal="route">
+            <svg viewBox="0 0 24 24"><path d="m3 11 18-8-8 18-2-8Z"/></svg>
+            Маршрут
+          </a>
+          <a class="btn btn-ghost" href="https://2gis.ru/geo/36.483554%2C55.602085" target="_blank" rel="noopener" data-goal="route">2ГИС</a>
+          <button class="btn btn-ghost" id="mapBtn" type="button" aria-expanded="false" aria-controls="mapBox">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.7-6.5-11A6.5 6.5 0 0 1 12 3.5 6.5 6.5 0 0 1 18.5 10c0 5.3-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+            <span>Карта</span>
+          </button>
+        </div>
+        <div class="map-box" id="mapBox" hidden></div>
       </div>
       <div class="addr-visual reveal" style="--d:.12s">
         <div class="addr-blob b1"></div>
@@ -1299,6 +1465,7 @@
         <li><a href="#services">Услуги</a></li>
         <li><a href="#gallery">Работы</a></li>
         <li><a href="#order">Собрать букет</a></li>
+        <li><a href="#reviews" hidden>Отзывы</a></li>
       </ul>
     </div>
     <div class="foot-contacts">
@@ -1315,10 +1482,42 @@
   <div class="wrap">
     <div class="foot-bottom">
       <span>© <span id="year">2026</span> флорист <b>Ирина Слепцова</b></span>
-      <span>Сделано с любовью к цветам ✿</span>
+      <span class="foot-links"><button type="button" data-review>Оставить отзыв</button><a href="/privacy.html" target="_blank" rel="noopener">Политика конфиденциальности</a></span>
     </div>
   </div>
 </footer>
+
+<dialog class="dlg" id="dlg" aria-labelledby="dlgTitle">
+  <form class="dlg-card" id="dlgForm" novalidate>
+    <button type="button" class="dlg-x" id="dlgX" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div id="dlgMain">
+      <div class="dlg-head">
+        <img class="dlg-ph" id="dlgPh" alt="" hidden>
+        <div>
+          <div class="dlg-eyebrow" id="dlgEyebrow"></div>
+          <h3 id="dlgTitle"></h3>
+          <p class="dlg-sub" id="dlgSub"></p>
+        </div>
+      </div>
+      <div class="row2 dlg-row" id="dlgRow">
+        <label class="field"><span class="field-label">Ваше имя</span><input class="inp" id="dName" maxlength="60" autocomplete="given-name" placeholder="Имя"></label>
+        <label class="field" id="dPhoneField"><span class="field-label">Телефон</span><input class="inp" id="dPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__"></label>
+      </div>
+      <div class="field" id="dStarsField"><span class="field-label">Оценка</span><div class="stars" id="dStars" role="radiogroup" aria-label="Оценка"></div></div>
+      <label class="field" id="dTextField"><span class="field-label" id="dTextLabel">Отзыв</span><textarea class="inp" id="dText" rows="4" maxlength="800"></textarea></label>
+      <input class="hp" id="dHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="dlg-err" id="dlgErr" role="alert"></p>
+      <button class="btn btn-primary dlg-send" id="dlgSend" type="submit"></button>
+      <p class="consent" id="dlgConsent">Нажимая кнопку, вы соглашаетесь на <a href="/privacy.html" target="_blank" rel="noopener">обработку персональных данных</a>.</p>
+    </div>
+    <div class="dlg-done" id="dlgDone" hidden>
+      <div class="dlg-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h3 id="dlgDoneTitle">Спасибо!</h3>
+      <p id="dlgDoneText"></p>
+      <button class="btn btn-primary" type="button" id="dlgOk">Хорошо</button>
+    </div>
+  </form>
+</dialog>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фото" aria-hidden="true">
   <button class="lb-btn lb-close" id="lbClose" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
@@ -1341,6 +1540,48 @@
   const $ = (s, c=document) => c.querySelector(s);
   const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
   const PHONE = '79264678000';
+  // per-viewer conveniences only (remembered contact, hidden notices); the page works without storage
+  const store = {
+    get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  };
+  const phoneDigits = s => { let d = String(s || '').replace(/\D/g, ''); if(d.length === 11 && d[0] === '8') d = '7' + d.slice(1); if(d.length === 10 && d[0] === '9') d = '7' + d; return d; };
+  const fmtPhoneInput = s => { const d = phoneDigits(s); return d.length === 11 && d[0] === '7' ? `+7 (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7,9)}-${d.slice(9)}` : s; };
+  const plural = (n, [one, few, many]) => { const a = Math.abs(n) % 100, b = a % 10; return n + ' ' + (a > 10 && a < 20 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many); };
+
+  // Yandex Metrica: the counter id comes from the server (env METRIKA_ID), goals are sent from buttons
+  let METRIKA = '';
+  function loadMetrika(id){
+    if(METRIKA || !/^\d+$/.test(id)) return;
+    METRIKA = id;
+    window.ym = window.ym || function(){ (window.ym.a = window.ym.a || []).push(arguments); };
+    window.ym.l = Date.now();
+    const s = document.createElement('script'); s.async = true; s.src = 'https://mc.yandex.ru/metrika/tag.js';
+    document.head.append(s);
+    window.ym(Number(id), 'init', {clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true});
+  }
+  const goal = name => { try{ if(METRIKA) window.ym(Number(METRIKA), 'reachGoal', name); }catch(e){} };
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href]'); if(!a) return;
+    const h = a.getAttribute('href');
+    if(h.startsWith('tel:')) goal('call');
+    else if(h.includes('wa.me/')) goal('whatsapp');
+    else if(h.includes('t.me/lrinaSlepcova')) goal('telegram');
+    else if(a.dataset.goal) goal(a.dataset.goal);
+  });
+
+  // one endpoint for every site form; errors come back as a readable sentence
+  async function postRequest(body){
+    try{
+      const r = await fetch('/api/request', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await r.json().catch(() => ({}));
+      return r.ok ? {ok:true, ...j} : {ok:false, error: j.error};
+    }catch(e){
+      return {ok:false};
+    }
+  }
+  const FAIL_TEXT = 'Не получилось отправить. Позвоните или напишите в WhatsApp: +7 (926) 467-80-00';
+  const saveContact = (name, phone) => store.set('contact', {name, phone});
 
   // photos used twice are embedded once and copied by reference
   $$('img[data-ref]').forEach(im => { const src = document.getElementById(im.dataset.ref); if(src) im.src = src.src; });
@@ -1504,6 +1745,10 @@
   const fDate = $('#fDate'), fTime = $('#fTime'), fBudget = $('#fBudget'), fName = $('#fName'), fAddress = $('#fAddress'), fWishes = $('#fWishes');
   const bubble = $('#bubble'), sendWa = $('#sendWa'), sendTg = $('#sendTg'), addrField = $('#addrField');
   const occOwn = $('#occOwn'), palOwn = $('#palOwn'), occChip = $('[data-own="occOwn"]'), palChip = $('[data-own="palOwn"]');
+  const fPhone = $('#fPhone'), sendSite = $('#sendSite');
+  const saved = store.get('contact') || {};
+  if(saved.name) fName.value = saved.name;
+  if(saved.phone) fPhone.value = saved.phone;
   const today = new Date();
   fDate.min = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
@@ -1545,6 +1790,15 @@
     }
     sendWa.href = `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
     sendTg.href = `https://t.me/lrinaSlepcova?text=${encodeURIComponent(msg)}`;
+    markSent(sentSig && sentSig === orderSig());
+  }
+  // the same text without the greeting and the name — they go to the bot as separate fields
+  const orderBody = () => buildMessage().split('\n').slice(2).filter(l => !l.startsWith('Меня зовут')).join('\n').trim();
+  const orderSig = () => orderBody() + '|' + phoneDigits(fPhone.value);
+  let sentSig = '';
+  function markSent(on){
+    sendSite.classList.toggle('is-sent', on);
+    $('span', sendSite).textContent = on ? '✓ Заявка отправлена' : 'Отправить заявку Ирине';
   }
   function selectOccasion(value){
     order.occasion = value;
@@ -1559,7 +1813,7 @@
     $('#' + chip.dataset.own + 'Wrap').classList.toggle('hidden', !on);
     if(on) setTimeout(()=> $('#' + chip.dataset.own).focus({preventScroll:true}), 60);
   }
-  $$('.chips').forEach(group=>{
+  $$('#orderForm .chips').forEach(group=>{
     const multi = group.hasAttribute('data-multi');
     group.addEventListener('click', (e)=>{
       const chip = e.target.closest('.chip');
@@ -1590,7 +1844,28 @@
     }[order.delivery];
     render();
   }));
-  [fDate, fTime, fBudget, fName, fAddress, fWishes, occOwn, palOwn].forEach(el => el.addEventListener('input', render));
+  [fDate, fTime, fBudget, fName, fAddress, fWishes, occOwn, palOwn, fPhone].forEach(el => el.addEventListener('input', render));
+  fPhone.addEventListener('input', ()=> fPhone.classList.remove('bad'));
+  fPhone.addEventListener('blur', ()=> { fPhone.value = fmtPhoneInput(fPhone.value); });
+  sendSite.addEventListener('click', async ()=>{
+    if(phoneDigits(fPhone.value).length < 10){
+      fPhone.classList.add('bad'); fPhone.focus();
+      toast('Укажите телефон — Ирина перезвонит по нему');
+      return;
+    }
+    if(sentSig && sentSig === orderSig()){ toast('Эта заявка уже у Ирины ✿'); return; }
+    sendSite.disabled = true;
+    $('span', sendSite).textContent = 'Отправляем…';
+    const r = await postRequest({type:'order', name: fName.value.trim(), phone: fPhone.value.trim(),
+      text: orderBody() || 'Просит перезвонить и помочь с выбором букета.', website: $('#fHp').value});
+    sendSite.disabled = false;
+    if(!r.ok){ markSent(false); toast(r.error || FAIL_TEXT); return; }
+    sentSig = orderSig();
+    markSent(true);
+    saveContact(fName.value.trim(), fPhone.value.trim());
+    goal('order_site');
+    toast((r.id ? `Заявка №${r.id} у Ирины` : 'Заявка у Ирины') + ' — она скоро позвонит или напишет ✿');
+  });
   $('#orderForm').addEventListener('submit', e => e.preventDefault());
   sendTg.addEventListener('click', ()=>{
     // text is prefilled via ?text=; copy as a fallback for clients that ignore it
@@ -1604,7 +1879,7 @@
 
   // gallery: filters + gap-free bento layout
   const grid = $('#gallery-grid');
-  const tiles = $$('a', grid);
+  let tiles = $$('a', grid);
   const visible = () => tiles.filter(t => !t.hidden);
   const mqMobile = matchMedia('(max-width:760px)');
   function holes(spans, cols){
@@ -1668,6 +1943,17 @@
     visible().filter(t => animate === 'all' || !before.has(t)).forEach((t, i) => { t.style.setProperty('--i', i); t.classList.add('pop'); });
   }
   const filterBtns = $$('#gFilters .chip');
+  function countChips(){
+    filterBtns.forEach(b => {
+      const n = b.dataset.f === 'all' ? tiles.length : tiles.filter(t => t.dataset.cat === b.dataset.f).length;
+      $('.cnt', b).textContent = n;
+      b.hidden = b.dataset.f !== 'all' && !n;
+    });
+    if(cat !== 'all' && !tiles.some(t => t.dataset.cat === cat)){
+      cat = 'all';
+      filterBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.f === 'all'));
+    }
+  }
   filterBtns.forEach(btn => btn.addEventListener('click', ()=>{
     cat = btn.dataset.f; expanded = false;
     filterBtns.forEach(b => b.setAttribute('aria-pressed', b === btn));
@@ -1704,10 +1990,38 @@
     document.body.style.overflow = '';
     if(lastFocus) lastFocus.focus({preventScroll:true});
   }
-  tiles.forEach(a=>{
-    a.setAttribute('aria-label', 'Открыть фото: ' + $('img', a).alt);
-    a.addEventListener('click', (e)=>{ e.preventDefault(); openLb(a); });
+  const labelTile = a => a.setAttribute('aria-label', 'Открыть фото: ' + $('img', a).alt);
+  tiles.forEach(labelTile);
+  grid.addEventListener('click', (e)=>{
+    const a = e.target.closest('a');
+    if(!a || !grid.contains(a)) return;
+    e.preventDefault(); openLb(a);
   });
+  // works that Irina adds through the bot go first; the built-in photos stay after them
+  const ZOOM_SVG = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  function setWorks(works){
+    const sig = JSON.stringify(works);
+    if(sig === grid.dataset.sig) return;
+    grid.dataset.sig = sig;
+    $$('a[data-live]', grid).forEach(a => a.remove());
+    const frag = document.createDocumentFragment();
+    works.forEach(w => {
+      const a = document.createElement('a');
+      a.href = '#'; a.dataset.cat = w.cat; a.dataset.live = '';
+      const img = document.createElement('img');
+      img.src = w.photo; img.alt = w.title; img.loading = 'lazy';
+      const capEl = document.createElement('span'); capEl.className = 'g-cap'; capEl.textContent = w.title;
+      const zoom = document.createElement('span'); zoom.className = 'g-zoom'; zoom.innerHTML = ZOOM_SVG;
+      a.append(img, capEl, zoom);
+      if(Date.now() - w.createdAt < 7 * 864e5){ const nb = document.createElement('span'); nb.className = 'g-new'; nb.textContent = 'Новое'; a.append(nb); }
+      labelTile(a);
+      frag.append(a);
+    });
+    grid.prepend(frag);
+    tiles = $$('a', grid);
+    countChips();
+    applyFilter();
+  }
   lbClose.addEventListener('click', closeLb);
   $('#lbPrev').addEventListener('click', ()=> show(cur - 1));
   $('#lbNext').addEventListener('click', ()=> show(cur + 1));
@@ -1754,20 +2068,37 @@
     img.src = it.photo; img.alt = 'Готовый букет: ' + it.title; img.loading = 'lazy';
     ph.append(img);
     const fresh = Date.now() - it.createdAt < 24 * 36e5;
-    if(reserved || fresh) ph.append(el('span', 'stock-badge', reserved ? 'Забронирован' : 'Новинка'));
+    const badges = el('span', 'stock-badges');
+    if(reserved) badges.append(el('span', 'stock-badge', 'Забронирован'));
+    else{
+      if(it.discount) badges.append(el('span', 'stock-badge sale', '−' + it.discount + '%'));
+      if(fresh) badges.append(el('span', 'stock-badge', 'Новинка'));
+    }
+    if(badges.childElementCount) ph.append(badges);
     const body = el('div', 'stock-body');
     body.append(el('h3', null, it.title));
     if(it.note) body.append(el('p', 'stock-note', it.note));
     const row = el('div', 'stock-row');
-    row.append(el('b', 'stock-price', rub(it.price)), el('span', 'stock-id', '№' + it.id));
+    const prices = el('span', 'stock-prices');
+    prices.append(el('b', 'stock-price', rub(it.price)));
+    if(it.oldPrice && !reserved) prices.append(el('s', 'stock-old', rub(it.oldPrice)));
+    row.append(prices, el('span', 'stock-id', '№' + it.id));
     const msg = reserved
       ? `Здравствуйте, Ирина! На сайте забронирован букет «${it.title}» (№${it.id}). Можно собрать похожий?`
       : `Здравствуйте, Ирина! Хочу забронировать готовый букет с сайта: «${it.title}» (№${it.id}) за ${rub(it.price)}. Он ещё в наличии?`;
-    const acts = el('div', 'stock-actions');
-    const wa = el('a', 'btn ' + (reserved ? 'btn-ghost' : 'btn-primary'));
+    const acts = el('div', 'stock-actions' + (reserved ? '' : ' three'));
+    const wa = el('a', reserved ? 'btn btn-ghost' : 'stock-tg');
     wa.innerHTML = WA_ICON;
-    wa.append(reserved ? 'Хочу похожий' : 'Забронировать');
     wa.href = `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
+    if(reserved) wa.append('Хочу похожий');
+    else{
+      wa.setAttribute('aria-label', 'Написать в WhatsApp');
+      const sent = reqSent.includes(it.id);
+      const rb = el('button', 'btn btn-primary' + (sent ? ' is-sent' : ''), sent ? '✓ Отправлено' : 'Забронировать');
+      rb.type = 'button';
+      rb.addEventListener('click', ()=> sent ? toast('Заявка уже у Ирины — она скоро позвонит ✿') : openDlg('reserve', it));
+      acts.append(rb);
+    }
     const tgA = el('a', 'stock-tg');
     tgA.innerHTML = TG_ICON;
     tgA.href = `https://t.me/lrinaSlepcova?text=${encodeURIComponent(msg)}`;
@@ -1779,6 +2110,7 @@
     ph.addEventListener('click', ()=> openLb(card, $$('.stock-card', stockGrid)));
     return card;
   }
+  let reqSent = store.get('reqSent') || [], lastItems = [];
   // «Свежая поставка»: pick flowers → they go into the order wishes
   const bouquetBlock = $('#bouquetBlock'), freshBlock = $('#freshBlock'), freshGrid = $('#freshGrid');
   const picked = new Set();
@@ -1828,6 +2160,7 @@
     toast('Добавили цветы в пожелания ✿');
   });
   function renderStock(items){
+    lastItems = items;
     const bouquets = items.filter(it => it.kind !== 'flower'), flowers = items.filter(it => it.kind === 'flower');
     stockSec.hidden = !items.length;
     bouquetBlock.hidden = !bouquets.length;
@@ -1846,17 +2179,188 @@
     }
     updateFreshBar();
   }
-  async function loadStock(){
+
+  // ---------- dialog: бронь букета / отзыв ----------
+  const dlg = $('#dlg'), dlgForm = $('#dlgForm'), dName = $('#dName'), dPhone = $('#dPhone'), dText = $('#dText');
+  const dlgErr = $('#dlgErr'), dlgSend = $('#dlgSend');
+  let dlgCfg = null, dRating = 5, lastDlgFocus = null;
+  const starsBox = $('#dStars');
+  for(let i = 1; i <= 5; i++){
+    const b = el('button', null, '★');
+    b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-label', plural(i, ['звезда', 'звезды', 'звёзд']));
+    b.addEventListener('click', ()=> setRating(i));
+    starsBox.append(b);
+  }
+  function setRating(n){
+    dRating = n;
+    $$('button', starsBox).forEach((b, i) => { b.classList.toggle('on', i < n); b.setAttribute('aria-checked', i === n - 1); });
+  }
+  const DLG = {
+    reserve: it => ({
+      eyebrow: 'Бронь готового букета', title: it.title, photo: it.photo,
+      sub: `№${it.id} · ${rub(it.price)}. Ирина перезвонит, подтвердит бронь и договорится, когда забрать или привезти.`,
+      send: 'Забронировать', phone: true, goal: 'reserve',
+      body: v => ({type:'reserve', itemId: it.id, name: v.name, phone: v.phone}),
+      done: v => ['Заявка на бронь у Ирины', `Она позвонит по номеру ${fmtPhoneInput(v.phone)} и подтвердит бронь. Пока букет ждёт вас ✿`],
+      after(){ reqSent = [...reqSent, it.id].slice(-30); store.set('reqSent', reqSent); stockSec.dataset.sig = ''; renderStock(lastItems); }
+    }),
+    review: () => ({
+      eyebrow: 'Отзыв', title: 'Как вам наши цветы?', sub: 'Отзыв появится на сайте после проверки.',
+      send: 'Отправить отзыв', stars: true, text: ['Ваш отзыв', 'Что понравилось, для какого повода был букет…'], goal: 'review',
+      body: v => ({type:'review', name: v.name, text: v.text, rating: dRating}),
+      done: () => ['Спасибо за отзыв!', 'Ирина прочитает его, и скоро он появится на сайте ✿']
+    })
+  };
+  function openDlg(mode, arg){
+    dlgCfg = DLG[mode](arg);
+    const c = dlgCfg, saved = store.get('contact') || {};
+    $('#dlgEyebrow').textContent = c.eyebrow;
+    $('#dlgTitle').textContent = c.title;
+    $('#dlgSub').textContent = c.sub;
+    const ph = $('#dlgPh'); ph.hidden = !c.photo; if(c.photo){ ph.src = c.photo; ph.alt = c.title; }
+    $('#dPhoneField').hidden = !c.phone;
+    $('#dlgRow').classList.toggle('one', !c.phone);
+    $('#dStarsField').hidden = !c.stars;
+    $('#dTextField').hidden = !c.text;
+    $('#dlgConsent').hidden = !c.phone;
+    if(c.text){ $('#dTextLabel').textContent = c.text[0]; dText.placeholder = c.text[1]; }
+    dText.value = '';
+    if(!dName.value) dName.value = saved.name || fName.value.trim();
+    if(!dPhone.value) dPhone.value = saved.phone || fPhone.value.trim();
+    setRating(5);
+    dlgErr.textContent = '';
+    dlgSend.textContent = c.send; dlgSend.disabled = false;
+    $('#dlgMain').hidden = false; $('#dlgDone').hidden = true;
+    lastDlgFocus = document.activeElement;
+    if(dlg.showModal) dlg.showModal(); else { dlg.classList.add('fallback'); dlg.setAttribute('open', ''); }
+    document.documentElement.style.overflow = 'hidden';
+    setTimeout(()=> (c.phone && !dPhone.value ? dPhone : c.text && mode === 'review' ? dText : dName).focus({preventScroll:true}), 80);
+  }
+  function closeDlg(){ if(dlg.close) dlg.close(); else { dlg.removeAttribute('open'); onDlgClosed(); } }
+  function onDlgClosed(){
+    document.documentElement.style.overflow = '';
+    if(lastDlgFocus) lastDlgFocus.focus({preventScroll:true});
+  }
+  dlg.addEventListener('close', onDlgClosed);
+  dlg.addEventListener('click', e => { if(e.target === dlg) closeDlg(); });
+  $('#dlgX').addEventListener('click', closeDlg);
+  $('#dlgOk').addEventListener('click', closeDlg);
+  dPhone.addEventListener('blur', ()=> { dPhone.value = fmtPhoneInput(dPhone.value); });
+  [dPhone, dText].forEach(i => i.addEventListener('input', ()=> { i.classList.remove('bad'); dlgErr.textContent = ''; }));
+  const dlgFail = (text, field) => { dlgErr.textContent = text; if(field){ field.classList.add('bad'); field.focus(); } };
+  dlgForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const c = dlgCfg;
+    const v = {name: dName.value.trim(), phone: dPhone.value.trim(), text: dText.value.trim()};
+    if(c.phone && phoneDigits(v.phone).length < 10) return dlgFail('Укажите телефон — Ирина перезвонит по нему', dPhone);
+    if(c.stars && v.text.length < 5) return dlgFail('Напишите хотя бы пару слов 🙂', dText);
+    dlgSend.disabled = true; dlgSend.textContent = 'Отправляем…'; dlgErr.textContent = '';
+    const r = await postRequest({...c.body(v), website: $('#dHp').value});
+    dlgSend.disabled = false; dlgSend.textContent = c.send;
+    if(!r.ok) return dlgFail(r.error || FAIL_TEXT);
+    if(c.phone) saveContact(v.name, v.phone); else if(v.name) saveContact(v.name, (store.get('contact') || {}).phone || '');
+    goal(c.goal);
+    const [title, text] = c.done(v);
+    $('#dlgDoneTitle').textContent = title; $('#dlgDoneText').textContent = text;
+    $('#dlgMain').hidden = true; $('#dlgDone').hidden = false;
+    $('#dlgOk').focus({preventScroll:true});
+    if(c.after) c.after(r);
+  });
+  $$('[data-review]').forEach(b => b.addEventListener('click', ()=> openDlg('review')));
+
+  // ---------- reviews ----------
+  const revSec = $('#reviews'), revGrid = $('#revGrid');
+  function renderReviews(list){
+    revSec.hidden = !list.length;
+    $$('a[href="#reviews"]').forEach(a => a.hidden = !list.length);
+    const sig = JSON.stringify(list);
+    if(sig === revSec.dataset.sig) return;
+    revSec.dataset.sig = sig;
+    if(!list.length) return;
+    const avg = list.reduce((s, v) => s + v.rating, 0) / list.length;
+    const sum = $('#revSummary');
+    sum.replaceChildren(el('b', null, '★ ' + avg.toFixed(1).replace('.', ',')), ' · ' + plural(list.length, ['отзыв', 'отзыва', 'отзывов']) + ' наших клиентов');
+    revGrid.replaceChildren(...list.map((v, i) => {
+      const card = el('article', 'rev-card');
+      card.style.setProperty('--i', i);
+      const stars = el('div', 'rev-stars', '★'.repeat(v.rating) + '☆'.repeat(5 - v.rating));
+      stars.setAttribute('aria-label', `Оценка ${v.rating} из 5`);
+      const text = el('p', 'rev-text', v.text);
+      const who = el('div', 'rev-who');
+      const info = el('div');
+      info.append(el('b', null, v.name), el('small', null, new Date(v.createdAt).toLocaleDateString('ru-RU', {month:'long', year:'numeric'}).replace(/\s*г\.$/, '')));
+      who.append(el('span', 'rev-ava', v.name.trim().charAt(0).toUpperCase() || '✿'), info);
+      card.append(stars, text);
+      if(v.text.length > 240){
+        card.classList.add('long');
+        const more = el('span', 'rev-toggle', 'Читать полностью');
+        card.append(more);
+        card.addEventListener('click', ()=>{ const open = card.classList.toggle('open'); more.textContent = open ? 'Свернуть' : 'Читать полностью'; });
+      }
+      card.append(who);
+      return card;
+    }));
+  }
+
+  // ---------- banner / pause from the bot ----------
+  const noticesBox = $('#notices');
+  function renderNotices(j){
+    const hiddenKeys = store.get('noticeHidden') || [];
+    const list = [];
+    if(j.pause) list.push({cls:'notice pause', key:'p:' + j.pause, lead:'🌙 Мастерская на паузе', text: ' — ' + (/[.!?…]$/.test(j.pause) ? j.pause : j.pause + '.') + ' Заявки с сайта принимаем — ответим, как вернёмся.'});
+    if(j.banner) list.push({cls:'notice', key:'b:' + j.banner, lead:'✿ ', text: j.banner});
+    const shown = list.filter(n => !hiddenKeys.includes(n.key));
+    const sig = shown.map(n => n.key).join('|');
+    if(noticesBox.dataset.sig === sig) return;
+    noticesBox.dataset.sig = sig;
+    noticesBox.replaceChildren(...shown.map(n => {
+      const box = el('div', n.cls);
+      box.setAttribute('role', 'status');
+      const inner = el('div', 'wrap notice-in');
+      const txt = el('span', 'notice-text');
+      txt.append(n.lead.startsWith('✿') ? n.lead : el('b', null, n.lead), n.text);
+      const x = el('button', 'notice-x');
+      x.type = 'button'; x.setAttribute('aria-label', 'Скрыть'); x.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+      x.addEventListener('click', ()=>{ store.set('noticeHidden', [...hiddenKeys, n.key].slice(-10)); box.remove(); noticesBox.dataset.sig = ''; });
+      inner.append(txt, x);
+      box.append(inner);
+      return box;
+    }));
+  }
+
+  // ---------- map: loaded only on request ----------
+  const mapBtn = $('#mapBtn'), mapBox = $('#mapBox');
+  mapBtn.addEventListener('click', ()=>{
+    const open = mapBox.hidden;
+    if(open && !mapBox.firstChild){
+      const f = document.createElement('iframe');
+      f.src = 'https://yandex.ru/map-widget/v1/?ll=36.483554%2C55.602085&z=16&oid=106085531124&ol=biz';
+      f.title = 'Мастерская на Яндекс Картах'; f.loading = 'lazy'; f.allowFullscreen = true;
+      mapBox.append(f);
+      goal('map');
+    }
+    mapBox.hidden = !open;
+    mapBtn.setAttribute('aria-expanded', open);
+    $('span', mapBtn).textContent = open ? 'Скрыть карту' : 'Карта';
+  });
+
+  // everything Irina changes through the bot: stock, portfolio, reviews, banner / pause
+  async function loadLive(){
     try{
       const r = await fetch('/api/items', {cache:'no-store'});
       if(!r.ok) return;
       const j = await r.json();
-      renderStock(Array.isArray(j.items) ? j.items : []);
-    }catch(_){ /* opened as a local file or offline — the section just stays hidden */ }
+      const arr = v => Array.isArray(v) ? v : [];
+      renderStock(arr(j.items));
+      setWorks(arr(j.works));
+      renderReviews(arr(j.reviews));
+      renderNotices(j);
+      if(j.metrika) loadMetrika(String(j.metrika));
+    }catch(_){ /* opened as a local file or offline — live blocks just stay hidden */ }
   }
-  loadStock();
-  setInterval(()=>{ if(!document.hidden) loadStock(); }, 45000);
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadStock(); });
+  loadLive();
+  setInterval(()=>{ if(!document.hidden) loadLive(); }, 45000);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadLive(); });
 
   $('#year').textContent = new Date().getFullYear();
 })();
