@@ -116,7 +116,7 @@ async function getChannel() {
 // caption + buttons of a channel post; state: available | reserved | sold | gone
 function channelPost(it, state = it.status) {
   const flower = isFlower(it);
-  const mark = { reserved: '🔒 <b>Забронирован</b>', sold: '✅ <b>Продано</b>', gone: '🥀 <b>Закончились</b> — ждите новую поставку' }[state];
+  const mark = { reserved: '🔒 <b>Забронирован</b>', sold: '✅ <b>Продано</b>', gone: '🥀 <b>Закончились</b> — ждём новую поставку' }[state];
   const lines = mark ? [mark, ''] : [];
   if (flower) {
     lines.push('🌷 Свежая поставка', `<b>${esc(it.title)}</b>` + (it.price ? ` — ${fmtPrice(it.price)}/шт` : ''));
