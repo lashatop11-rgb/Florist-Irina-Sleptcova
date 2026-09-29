@@ -921,6 +921,10 @@
   .dlg-check svg{width:30px; height:30px; stroke:currentColor; stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round;}
   .dlg-done p{color:var(--ink-soft); line-height:1.6; font-weight:400; margin:10px 0 22px;}
   .dlg-done .btn{min-width:180px;}
+  .dlg-done .dlg-track{display:flex; width:fit-content; margin:0 auto 10px;}
+  #orderTrack, .dlg-track{white-space:normal; text-align:center; line-height:1.35;}
+  @media (max-width:760px){ #orderTrack, .dlg-track{padding:14px 16px; font-size:0.66rem; letter-spacing:0.08em;} }
+  .track-note{margin:0; font-size:0.78rem; line-height:1.5; color:var(--ink-soft); text-align:center;}
 
   @media (max-width:760px){
     .notice-in{font-size:0.78rem; padding-top:8px; padding-bottom:8px; gap:8px;}
@@ -1365,6 +1369,8 @@
               <svg viewBox="0 0 24 24"><path d="M4 12 20 4l-6 16-3-7Z"/><path d="m11 13 9-9"/></svg>
               <span>Отправить заявку Ирине</span>
             </button>
+            <a class="btn btn-ghost" id="orderTrack" target="_blank" rel="noopener" data-goal="track" hidden><svg viewBox="0 0 24 24"><path d="m21 2-19 9 6 2 2 6 3-4 6 4Z"/></svg>Следить за заявкой в Telegram</a>
+            <p class="track-note" id="orderTrackNote" hidden>Бот пришлёт, когда Ирина примет заявку и когда букет будет готов</p>
             <p class="consent">Нажимая кнопку, вы соглашаетесь на <a href="/privacy.html" target="_blank" rel="noopener">обработку персональных данных</a>.</p>
           </div>
           <div class="or">или напишите сами</div>
@@ -1528,6 +1534,7 @@
       <div class="dlg-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h3 id="dlgDoneTitle">Спасибо!</h3>
       <p id="dlgDoneText"></p>
+      <a class="btn btn-ghost dlg-track" id="dlgTrack" target="_blank" rel="noopener" data-goal="track" hidden><svg viewBox="0 0 24 24"><path d="m21 2-19 9 6 2 2 6 3-4 6 4Z"/></svg>Узнать ответ в Telegram</a>
       <button class="btn btn-primary" type="button" id="dlgOk">Хорошо</button>
     </div>
   </form>
@@ -1810,6 +1817,13 @@
   const orderBody = () => buildMessage().split('\n').slice(2).filter(l => !l.startsWith('Меня зовут')).join('\n').trim();
   const orderSig = () => orderBody() + '|' + phoneDigits(fPhone.value);
   let sentSig = '';
+  // «Следить в Telegram»: the bot link with this order's code, sent back by /api/request
+  const isTrack = url => /^https:\/\/t\.me\/\w+\?start=[or]\d+_[a-z0-9]+$/.test(url || '');
+  function showTrack(url){
+    const ok = isTrack(url);
+    $('#orderTrack').hidden = $('#orderTrackNote').hidden = !ok;
+    if(ok) $('#orderTrack').href = url;
+  }
   function markSent(on){
     sendSite.classList.toggle('is-sent', on);
     $('span', sendSite).textContent = on ? '✓ Заявка отправлена' : 'Отправить заявку Ирине';
@@ -1869,6 +1883,7 @@
     }
     if(sentSig && sentSig === orderSig()){ toast('Эта заявка уже у Ирины ✿'); return; }
     sendSite.disabled = true;
+    showTrack(null);
     $('span', sendSite).textContent = 'Отправляем…';
     const r = await postRequest({type:'order', name: fName.value.trim(), phone: fPhone.value.trim(),
       text: orderBody() || 'Просит перезвонить и помочь с выбором букета.', website: $('#fHp').value});
@@ -1878,6 +1893,7 @@
     markSent(true);
     saveContact(fName.value.trim(), fPhone.value.trim());
     goal('order_site');
+    showTrack(r.track);
     toast((r.id ? `Заявка №${r.id} у Ирины` : 'Заявка у Ирины') + ' — она скоро позвонит или напишет ✿');
   });
   $('#orderForm').addEventListener('submit', e => e.preventDefault());
@@ -2276,6 +2292,8 @@
     goal(c.goal);
     const [title, text] = c.done(v);
     $('#dlgDoneTitle').textContent = title; $('#dlgDoneText').textContent = text;
+    const tr = $('#dlgTrack'); tr.hidden = !isTrack(r.track);
+    if(!tr.hidden){ tr.href = r.track; $('#dlgDoneText').textContent += ' Нажмите ниже — ответ придёт и в Telegram.'; }
     $('#dlgMain').hidden = true; $('#dlgDone').hidden = false;
     $('#dlgOk').focus({preventScroll:true});
     if(c.after) c.after(r);
