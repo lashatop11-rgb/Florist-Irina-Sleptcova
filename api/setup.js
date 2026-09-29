@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       commands: [
         { command: 'list', description: 'Что сейчас на сайте' },
         { command: 'help', description: 'Как добавить букет' },
+        { command: 'channel', description: 'Публикация в Telegram-канал' },
       ],
     });
     steps.push('', `Готово! Теперь Ирина открывает @${me.username} и отправляет: /admin <тот же код>`);

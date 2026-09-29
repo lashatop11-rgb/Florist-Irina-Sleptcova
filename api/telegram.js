@@ -3,9 +3,13 @@
 //   💐 Готовый букет  — «Пионы с эвкалиптом, 4500» (price required) → block «Готовые букеты»
 //   🌷 Свежая поставка — «Пионы Сара Бернар, 350» (price per stem optional) → block «Свежая поставка»
 // Buttons under a bouquet: 🔒 Бронь / ✅ Продано / 🗑 Удалить; under a flower: 🥀 Закончились.
+// Everything is mirrored to the Telegram channel: the post is created on publish and updated on every status change.
 import { tg, redis, listItems, getItem, saveItem, deleteItem, nextId, isAdmin } from './_lib.js';
 
 const ORDER_CONTACT = 'https://t.me/lrinaSlepcova';
+const PHONE = '79264678000';
+const DEFAULT_CHANNEL = '@FloristIrinaSleptsova';
+let SITE = ''; // set per request from the Host header, used for the «на сайте» button in channel posts
 const DRAFT_TTL = 2 * 24 * 3600; // seconds a photo waits for the «букет / поставка» answer
 
 const HELP = [
@@ -20,7 +24,10 @@ const HELP = [
   'Подпись можно исправить прямо в Telegram — сайт обновится.',
   '',
   'Под букетом: 🔒 Бронь, ✅ Продано, 🗑 Удалить. Под цветком: 🥀 Закончились.',
+  'Всё сразу публикуется и в Telegram-канал, а кнопки обновляют пост и там.',
+  '',
   '/list — что сейчас на сайте',
+  '/channel — какой канал подключён (/channel off — не публиковать в канал)',
 ].join('\n');
 
 const fmtPrice = (n) => Number(n).toLocaleString('ru-RU').replace(/ /g, ' ') + ' ₽';
@@ -98,6 +105,84 @@ const KIND_KEYBOARD = (msgId) => ({
 const send = (chat_id, text, extra = {}) => tg('sendMessage', { chat_id, text, disable_web_page_preview: true, ...extra });
 const replyTo = (msg) => ({ reply_parameters: { message_id: msg.message_id, allow_sending_without_reply: true } });
 
+// ---------- Telegram channel ----------
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+async function getChannel() {
+  const c = await redis('GET', 'channel');
+  return c === 'off' ? null : c || DEFAULT_CHANNEL;
+}
+
+// caption + buttons of a channel post; state: available | reserved | sold | gone
+function channelPost(it, state = it.status) {
+  const flower = isFlower(it);
+  const mark = { reserved: '🔒 <b>Забронирован</b>', sold: '✅ <b>Продано</b>', gone: '🥀 <b>Закончились</b> — ждите новую поставку' }[state];
+  const lines = mark ? [mark, ''] : [];
+  if (flower) {
+    lines.push('🌷 Свежая поставка', `<b>${esc(it.title)}</b>` + (it.price ? ` — ${fmtPrice(it.price)}/шт` : ''));
+    if (it.note) lines.push(esc(it.note));
+    if (state === 'available') lines.push('', 'Соберём букет из свежих цветов — пишите!');
+  } else {
+    lines.push(`💐 Готовый букет · №${it.id}`, `<b>${esc(it.title)}</b>`, state === 'sold' ? `<s>${fmtPrice(it.price)}</s>` : fmtPrice(it.price));
+    if (it.note) lines.push(esc(it.note));
+    if (state === 'available') lines.push('', 'Можно забрать сегодня · доставка по Тучково 0 ₽');
+  }
+  const text = flower ? `Здравствуйте, Ирина! Хочу букет со свежими цветами: ${it.title}.`
+    : state === 'available' ? `Здравствуйте, Ирина! Хочу забронировать букет «${it.title}» (№${it.id}) за ${fmtPrice(it.price)}.`
+    : `Здравствуйте, Ирина! Хочу букет, похожий на «${it.title}» (№${it.id}).`;
+  const q = encodeURIComponent(text);
+  const rows = [];
+  if (state !== 'gone') {
+    const label = flower ? 'Заказать букет' : state === 'available' ? 'Забронировать' : 'Хочу похожий';
+    rows.push([{ text: `💬 ${label}`, url: `https://t.me/lrinaSlepcova?text=${q}` }, { text: 'WhatsApp', url: `https://wa.me/${PHONE}?text=${q}` }]);
+  }
+  if (SITE) rows.push([{ text: '🌸 Всё в наличии на сайте', url: `${SITE}/#stock` }]);
+  return { caption: lines.join('\n'), parse_mode: 'HTML', reply_markup: { inline_keyboard: rows } };
+}
+
+const NO_RIGHTS = /not enough rights|chat not found|not a member|administrator|CHAT_ADMIN_REQUIRED|have no rights/i;
+const HOW_TO_ADMIN = 'добавьте бота администратором канала (Управление каналом → Администраторы) с правами «Публикация», «Редактирование» и «Удаление сообщений»';
+
+async function postToChannel(item) {
+  const channel = await getChannel();
+  if (!channel) return '';
+  try {
+    const m = await tg('sendPhoto', { chat_id: channel, photo: item.fileId, ...channelPost(item) });
+    item.channelChat = m.chat.id;
+    item.channelMsg = m.message_id;
+    return '📣 и в канале';
+  } catch (e) {
+    return '⚠️ В канал не отправлено: ' + (NO_RIGHTS.test(e.message) ? HOW_TO_ADMIN : e.message);
+  }
+}
+
+const syncChannel = (item, state) => item.channelMsg
+  ? tg('editMessageCaption', { chat_id: item.channelChat, message_id: item.channelMsg, ...channelPost(item, state) }).catch(() => {})
+  : null;
+
+async function onChannel(chat, arg) {
+  if (!arg) {
+    const c = await getChannel();
+    return send(chat, c
+      ? `Публикую в канал ${c}.\n/channel off — выключить\n/channel @имя — другой канал`
+      : 'Публикация в канал выключена.\n/channel @имя_канала — включить');
+  }
+  if (arg === 'off') {
+    await redis('SET', 'channel', 'off');
+    return send(chat, 'Готово: в канал больше не публикую, только на сайт.');
+  }
+  const name = /^(@|-100)/.test(arg) ? arg : '@' + arg.replace(/^(https?:\/\/)?t\.me\//, '');
+  try {
+    const ch = await tg('getChat', { chat_id: name });
+    const me = await tg('getChatMember', { chat_id: ch.id, user_id: Number(String(process.env.TELEGRAM_BOT_TOKEN).split(':')[0]) });
+    if (me.status !== 'administrator' || !me.can_post_messages) return send(chat, `Не могу публиковать в ${name}: ${HOW_TO_ADMIN}.`);
+    await redis('SET', 'channel', name);
+    return send(chat, `Готово: букеты и поставки будут публиковаться в «${ch.title || name}».`);
+  } catch (e) {
+    return send(chat, `Не нашёл канал ${name}: ${e.message}`);
+  }
+}
+
 async function onPhoto(msg) {
   if (!String(msg.caption || '').trim()) {
     if (msg.media_group_id) return; // other photos of an album — skip quietly
@@ -122,6 +207,7 @@ async function onEditedPhoto(msg) {
   if (!parsed) return send(msg.chat.id, 'Не вижу цену в подписи — на сайте осталась прежняя.', replyTo(msg));
   Object.assign(item, parsed, { fileId });
   await saveItem(item);
+  await syncChannel(item, item.status);
   if (item.cardMsg) {
     await tg('editMessageText', {
       chat_id: item.chatId, message_id: item.cardMsg, text: cardText(item, '✏️ Обновлено на сайте'), reply_markup: keyboard(item),
@@ -167,8 +253,10 @@ async function onCallback(q) {
       createdAt: Date.now(), chatId: draft.chatId, srcMsg: draft.srcMsg, cardMsg: m.message_id,
     };
     await saveItem(item);
-    await answer('Опубликовано на сайте');
-    return edit(cardText(item, '✨ Опубликовано на сайте'), keyboard(item));
+    const channelNote = await postToChannel(item);
+    if (item.channelMsg) await saveItem(item);
+    await answer('Опубликовано');
+    return edit(cardText(item, ['✨ Опубликовано на сайте', channelNote].filter(Boolean).join('\n')), keyboard(item));
   }
 
   const item = await getItem(id);
@@ -179,12 +267,15 @@ async function onCallback(q) {
   if (act === 'r' || act === 'a') {
     item.status = act === 'r' ? 'reserved' : 'available';
     await saveItem(item);
+    await syncChannel(item, item.status);
     await answer(act === 'r' ? 'На сайте отмечен как забронированный' : 'Снова доступен для заказа');
     return edit(cardText(item), keyboard(item));
   }
   if (act === 's' || act === 'd') {
     await deleteItem(item.id);
     if (act === 's' && !isFlower(item)) await redis('INCR', 'stock:sold');
+    if (act === 'd' && item.channelMsg) await tg('deleteMessage', { chat_id: item.channelChat, message_id: item.channelMsg }).catch(() => {});
+    else await syncChannel(item, isFlower(item) ? 'gone' : 'sold');
     const head = isFlower(item) ? '🥀 Закончились — сняты с сайта' : act === 's' ? '✅ Продано — снят с сайта' : '🗑 Удалён с сайта';
     await answer('Снято с сайта');
     return edit(cardText(item, head).replace(/\nСтатус:.*$/, ''));
@@ -211,6 +302,8 @@ export async function onUpdate(u) {
   }
   if (msg.photo) return u.edited_message ? onEditedPhoto(msg) : onPhoto(msg);
   if (/^\/list\b/.test(text)) return onList(chat);
+  const channelCmd = text.match(/^\/channel(?:@\w+)?(?:\s+(\S+))?/);
+  if (channelCmd) return onChannel(chat, channelCmd[1]);
   return send(chat, HELP);
 }
 
@@ -218,6 +311,7 @@ export default async function handler(req, res) {
   const secret = process.env.TELEGRAM_SECRET;
   if (req.method !== 'POST') return res.status(200).send('ok');
   if (!secret || req.headers['x-telegram-bot-api-secret-token'] !== secret) return res.status(401).end();
+  SITE = process.env.SITE_URL || `https://${req.headers['x-forwarded-host'] || req.headers.host}`;
   try {
     await onUpdate(req.body || {});
   } catch (e) {
