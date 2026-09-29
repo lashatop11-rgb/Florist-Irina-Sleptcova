@@ -7,8 +7,8 @@ const noticeText = (raw) => { try { return raw ? JSON.parse(raw).text || '' : ''
 
 export default async function handler(req, res) {
   try {
-    const [stock, works, reviews, banner, pause] = await Promise.all([
-      listItems(), hList('works'), hList('reviews'), redis('GET', 'banner'), redis('GET', 'pause'),
+    const [stock, works, reviews, banner, pause, reviewChannel] = await Promise.all([
+      listItems(), hList('works'), hList('reviews'), redis('GET', 'banner'), redis('GET', 'pause'), redis('GET', 'reviewChannel'),
     ]);
     const items = stock.map((it) => ({
       id: it.id,
@@ -31,6 +31,8 @@ export default async function handler(req, res) {
         .map((v) => ({ id: v.id, name: v.name, text: v.text, rating: v.rating, createdAt: v.createdAt })),
       banner: noticeText(banner),
       pause: noticeText(pause),
+      // public reviews channel → «Все отзывы в Telegram» on the site (private channels have no link)
+      reviewsChannel: /^@\w{4,}$/.test(reviewChannel || '') ? `https://t.me/${reviewChannel.slice(1)}` : '',
       metrika: /^\d{5,12}$/.test(process.env.METRIKA_ID || '') ? process.env.METRIKA_ID : '',
     });
   } catch (e) {

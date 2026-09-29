@@ -79,7 +79,7 @@ const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
 const REVIEW_STATUS = { pending: '⏳ ждёт проверки', published: '🟢 на сайте', hidden: '🙈 скрыт', deleted: '🗑 удалён' };
 
 export function reviewText(v) {
-  return [`<b>💬 Отзыв №${v.id}</b> · ${REVIEW_STATUS[v.status]}`, `${stars(v.rating)} · ${esc(v.name)}`, '', `«${esc(v.text)}»`].join('\n');
+  return [`<b>💬 Отзыв №${v.id}</b> · ${REVIEW_STATUS[v.status]}${v.channelMsg ? ' · 📣 в канале' : ''}`, `${stars(v.rating)} · ${esc(v.name)}`, '', `«${esc(v.text)}»`].join('\n');
 }
 export function reviewKeyboard(v) {
   if (v.status === 'deleted') return { inline_keyboard: [] };

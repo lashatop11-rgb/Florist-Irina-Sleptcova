@@ -25,6 +25,7 @@ export default async function handler(req, res) {
         { command: 'banner', description: 'Объявление на сайте' },
         { command: 'pause', description: 'Мастерская на паузе' },
         { command: 'channel', description: 'Публикация в Telegram-канал' },
+        { command: 'reviewchannel', description: 'Канал для отзывов' },
         { command: 'help', description: 'Как пользоваться ботом' },
       ],
     });

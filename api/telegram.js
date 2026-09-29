@@ -40,6 +40,7 @@ const HELP = [
   '/pause до 5 октября — «мастерская на паузе» · /pause off — снять',
   '/stats — статистика',
   '/channel — Telegram-канал (/channel off — не публиковать в канал)',
+  '/reviewchannel — отдельный канал для отзывов (/reviewchannel off — выключить)',
 ].join('\n');
 
 const clean = (s) => s.replace(/^[\s,.;:—–-]+|[\s,.;:—–-]+$/g, '').replace(/\s{2,}/g, ' ');
@@ -244,27 +245,84 @@ const dropChannelPost = (row) => row.channelMsg
   ? tg('deleteMessage', { chat_id: row.channelChat, message_id: row.channelMsg }).catch(() => {})
   : null;
 
-async function onChannel(chat, arg) {
+// two channels: the main one (bouquets, flowers, works) and an optional one only for reviews
+const CHANNELS = {
+  main: { key: 'channel', cmd: '/channel', what: 'букеты, поставки и работы' },
+  reviews: { key: 'reviewChannel', cmd: '/reviewchannel', what: 'опубликованные отзывы' },
+};
+const botId = () => Number(String(process.env.TELEGRAM_BOT_TOKEN).split(':')[0]);
+const getReviewChannel = async () => (await redis('GET', 'reviewChannel')) || null;
+
+async function onChannel(chat, arg, kind = 'main') {
+  const c = CHANNELS[kind];
   if (!arg) {
-    const c = await getChannel();
-    return send(chat, c
-      ? `Публикую в канал ${c}.\n/channel off — выключить\n/channel @имя — другой канал`
-      : 'Публикация в канал выключена.\n/channel @имя_канала — включить');
+    const cur = kind === 'main' ? await getChannel() : await getReviewChannel();
+    // the next post forwarded from a channel within 10 minutes connects it — works for private channels too
+    await redis('SET', `await:${chat}`, kind, 'EX', 600);
+    const how = `пришлите ${c.cmd} @имя_канала или перешлите сюда любой пост из канала.`;
+    if (kind === 'main') {
+      return send(chat, cur ? `Публикую в канал ${cur}.\n${c.cmd} off — выключить\nДругой канал — ${how}` : `Публикация в канал выключена.\nВключить — ${how}`);
+    }
+    return send(chat, cur
+      ? `Отзывы публикую в канал ${cur}.\n${c.cmd} off — выключить\nДругой канал — ${how}`
+      : `Канал для отзывов не подключён.\n1. Создайте канал в Telegram и добавьте бота администратором с правами «Публикация», «Редактирование» и «Удаление сообщений».\n2. Затем ${how}`);
   }
   if (arg === 'off') {
-    await redis('SET', 'channel', 'off');
-    return send(chat, 'Готово: в канал больше не публикую, только на сайт.');
+    if (kind === 'main') await redis('SET', 'channel', 'off');
+    else await redis('DEL', 'reviewChannel');
+    return send(chat, kind === 'main' ? 'Готово: в канал больше не публикую, только на сайт.' : 'Готово: отзывы больше не публикую в канал, только на сайт.');
   }
   const name = /^(@|-100)/.test(arg) ? arg : '@' + arg.replace(/^(https?:\/\/)?t\.me\//, '');
+  return connectChannel(chat, kind, name);
+}
+
+async function connectChannel(chat, kind, ref) {
+  const c = CHANNELS[kind];
+  const byName = String(ref).startsWith('@');
   try {
-    const ch = await tg('getChat', { chat_id: name });
-    const me = await tg('getChatMember', { chat_id: ch.id, user_id: Number(String(process.env.TELEGRAM_BOT_TOKEN).split(':')[0]) });
-    if (me.status !== 'administrator' || !me.can_post_messages) return send(chat, `Не могу публиковать в ${name}: ${HOW_TO_ADMIN}.`);
-    await redis('SET', 'channel', name);
-    return send(chat, `Готово: букеты, поставки и работы будут публиковаться в «${ch.title || name}».`);
+    const ch = await tg('getChat', { chat_id: ref });
+    const me = await tg('getChatMember', { chat_id: ch.id, user_id: botId() });
+    if (me.status !== 'administrator' || !me.can_post_messages) {
+      return send(chat, `Не могу публиковать в ${byName ? ref : `«${ch.title || ref}»`}: ${HOW_TO_ADMIN}.`);
+    }
+    await redis('SET', c.key, byName ? ref : ch.username ? '@' + ch.username : String(ch.id));
+    await redis('DEL', `await:${chat}`);
+    const done = `Готово: ${c.what} будут публиковаться в «${ch.title || ref}».`;
+    if (kind === 'main') return send(chat, done);
+    const waiting = (await hList('reviews')).filter((v) => v.status === 'published' && !v.channelMsg).length;
+    return send(chat, done, waiting
+      ? { reply_markup: { inline_keyboard: [[{ text: `📣 Выложить уже одобренные (${waiting})`, callback_data: 'rc:all' }]] } }
+      : {});
   } catch (e) {
-    return send(chat, `Не нашёл канал ${name}: ${e.message}`);
+    return send(chat, `Не нашёл канал ${ref}: ${e.message}`);
   }
+}
+
+// ---------- reviews channel ----------
+function reviewPost(v) {
+  const lines = ['★'.repeat(v.rating) + '☆'.repeat(5 - v.rating), '', `«${esc(v.text)}»`, '', `— <b>${esc(v.name)}</b>`];
+  const row = [{ text: '💐 Заказать букет', url: ORDER_CONTACT }];
+  if (SITE) row.push({ text: '✍️ Оставить отзыв', url: `${SITE}/#reviews` });
+  return { text: lines.join('\n'), parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: { inline_keyboard: [row] } };
+}
+
+// returns a line for Irina: '' when the reviews channel is off
+async function postReview(v) {
+  const channel = await getReviewChannel();
+  if (!channel || v.channelMsg) return '';
+  try {
+    const m = await tg('sendMessage', { chat_id: channel, ...reviewPost(v) });
+    Object.assign(v, { channelChat: m.chat.id, channelMsg: m.message_id });
+    return '📣 и в канале отзывов';
+  } catch (e) {
+    return channelError(e).replace('В канал', 'В канал отзывов');
+  }
+}
+
+async function unpostReview(v) {
+  await dropChannelPost(v);
+  delete v.channelChat;
+  delete v.channelMsg;
 }
 
 // ---------- items: shared steps ----------
@@ -412,8 +470,9 @@ async function onReviewAdd(chat, arg) {
   const r = text.match(/\s*(?:(★{1,5})|\b([1-5])\s*\/\s*5)\s*$/);
   if (r) { rating = r[1] ? r[1].length : Number(r[2]); text = text.slice(0, r.index).trim(); }
   const v = { id: await seq('reviews'), name: m[1].trim(), text: text.slice(0, 800), rating, status: 'published', createdAt: Date.now(), source: 'bot' };
+  const note = await postReview(v);
   await hSave('reviews', v);
-  await send(chat, '✨ Отзыв добавлен на сайт.');
+  await send(chat, '✨ Отзыв добавлен на сайт.' + (note ? '\n' + note : ''));
   return sendReview(chat, v);
 }
 
@@ -555,15 +614,41 @@ async function onCallback(q) {
   if (act === 'v') {
     const v = await hGet('reviews', id);
     if (!v) { await answer('Отзыв уже удалён'); return edit('🗑 Отзыв удалён'); }
+    const wasPosted = Boolean(v.channelMsg);
+    let note = '';
     if (arg === 'del') {
       await hDel('reviews', v.id);
+      await unpostReview(v);
       v.status = 'deleted';
     } else {
       v.status = arg === 'pub' ? 'published' : 'hidden';
+      if (v.status === 'published') note = await postReview(v);
+      else await unpostReview(v);
       await hSave('reviews', v);
     }
     await syncReview(v);
-    return answer({ pub: 'Опубликован на сайте', hide: 'Скрыт с сайта', del: 'Удалён' }[arg] || '');
+    if (note.startsWith('⚠️')) await send(m.chat.id, note);
+    const posted = note.startsWith('📣');
+    return answer({
+      pub: posted ? 'Опубликован на сайте и в канале отзывов' : 'Опубликован на сайте',
+      hide: wasPosted ? 'Скрыт с сайта и из канала' : 'Скрыт с сайта',
+      del: 'Удалён',
+    }[arg] || '');
+  }
+
+  // --- выложить в канал отзывы, одобренные до его подключения ---
+  if (act === 'rc') {
+    if (!(await getReviewChannel())) return answer('Канал для отзывов не подключён', true);
+    const list = (await hList('reviews')).filter((v) => v.status === 'published' && !v.channelMsg).reverse().slice(0, 30);
+    await answer('Выкладываю…');
+    let posted = 0, note = '';
+    for (const v of list) {
+      note = await postReview(v);
+      if (!v.channelMsg) break;
+      await hSave('reviews', v);
+      posted++;
+    }
+    return edit(`Готово: в канал выложено ${plural(posted, ['отзыв', 'отзыва', 'отзывов'])}.` + (note.startsWith('⚠️') ? '\n' + note : ''));
   }
 
   // --- портфолио ---
@@ -637,6 +722,11 @@ export async function onUpdate(u) {
   if (!(await isAdmin(msg.from?.id))) {
     return send(chat, `Здравствуйте! Это служебный бот мастерской «флорист Ирина Слепцова».\nЗаказать букет: ${ORDER_CONTACT}`);
   }
+  const fwd = msg.forward_origin?.type === 'channel' ? msg.forward_origin.chat : msg.forward_from_chat;
+  if (fwd && !u.edited_message) {
+    const kind = await redis('GET', `await:${chat}`);
+    if (kind && CHANNELS[kind]) return connectChannel(chat, kind, fwd.username ? '@' + fwd.username : fwd.id);
+  }
   if (msg.photo) return u.edited_message ? onEditedPhoto(msg) : onPhoto(msg);
 
   const cmd = text.match(/^\/(\w+)(?:@\w+)?(?:\s+([\s\S]+))?$/);
@@ -650,7 +740,8 @@ export async function onUpdate(u) {
     case 'banner': return onNotice(chat, 'banner', arg);
     case 'pause': return onNotice(chat, 'pause', arg);
     case 'stats': return sendHtml(chat, await statsText());
-    case 'channel': return onChannel(chat, arg.split(/\s+/)[0]);
+    case 'channel': return onChannel(chat, arg.split(/\s+/)[0], 'main');
+    case 'reviewchannel': return onChannel(chat, arg.split(/\s+/)[0], 'reviews');
     default: return send(chat, HELP);
   }
 }
