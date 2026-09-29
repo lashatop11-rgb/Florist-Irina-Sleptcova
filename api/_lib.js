@@ -29,9 +29,25 @@ export async function tg(method, params = {}) {
   return j.result;
 }
 
+// the bot's @username for t.me links to it; it never changes, so it is cached
+export async function botName() {
+  const cached = await redis('GET', 'bot:username');
+  if (cached) return cached;
+  const me = await tg('getMe');
+  await redis('SET', 'bot:username', me.username, 'EX', 7 * 86400);
+  return me.username;
+}
+
+// short random code for links like t.me/bot?start=o12_<code>
+export function randomCode(n = 10) {
+  const bytes = globalThis.crypto?.getRandomValues ? globalThis.crypto.getRandomValues(new Uint8Array(n))
+    : Array.from({ length: n }, () => Math.floor(Math.random() * 256));
+  return Array.from(bytes, (b) => (b % 36).toString(36)).join('');
+}
+
 // ---------- JSON records in Redis hashes ----------
 // stock — букеты и цветы в наличии, works — портфолио, orders — заявки с сайта,
-// reviews — отзывы
+// reviews — отзывы, clients — клиенты по номеру телефона
 export async function hList(key) {
   const flat = (await redis('HGETALL', key)) || [];
   const rows = [];

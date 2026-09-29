@@ -1,5 +1,6 @@
 // GET /api/setup?key=<TELEGRAM_SECRET> — one-time: connects the bot to this site and checks storage.
-import { tg, redis } from './_lib.js';
+import { tg, redis, adminChats } from './_lib.js';
+import { ADMIN_COMMANDS } from './_shop.js';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -15,20 +16,14 @@ export default async function handler(req, res) {
     const url = `https://${req.headers['x-forwarded-host'] || req.headers.host}/api/telegram`;
     await tg('setWebhook', { url, secret_token: secret, allowed_updates: ['message', 'edited_message', 'callback_query'] });
     steps.push(`✓ Бот подключён к ${url}`);
-    await tg('setMyCommands', {
-      commands: [
-        { command: 'list', description: 'Что сейчас в наличии' },
-        { command: 'orders', description: 'Открытые заявки с сайта' },
-        { command: 'works', description: 'Портфолио' },
-        { command: 'reviews', description: 'Отзывы' },
-        { command: 'stats', description: 'Статистика' },
-        { command: 'banner', description: 'Объявление на сайте' },
-        { command: 'pause', description: 'Мастерская на паузе' },
-        { command: 'channel', description: 'Публикация в Telegram-канал' },
-        { command: 'reviewchannel', description: 'Канал для отзывов' },
-        { command: 'help', description: 'Как пользоваться ботом' },
-      ],
-    });
+    // the command menu is only for admins; clients see a clean bot
+    await tg('deleteMyCommands', {});
+    const admins = await adminChats();
+    for (const chat_id of admins) {
+      await tg('setMyCommands', { commands: ADMIN_COMMANDS, scope: { type: 'chat', chat_id } }).catch(() => {});
+    }
+    await redis('SET', 'bot:username', me.username, 'EX', 7 * 86400);
+    steps.push(`✓ Меню команд обновлено${admins.length ? ` (админов: ${admins.length})` : ''}`);
     steps.push('', `Готово! Теперь Ирина открывает @${me.username} и отправляет: /admin <тот же код>`);
     res.status(200).send(steps.join('\n'));
   } catch (e) {

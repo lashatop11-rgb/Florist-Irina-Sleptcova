@@ -1,11 +1,28 @@
 // POST /api/request — forms on the site: заказ из конструктора, бронь готового букета, отзыв.
 // Everything lands in the bot as a message with buttons (see _shop.js); nothing is published without Irina.
-import { redis, hSave, seq, getItem, notifyAdmins, normPhone, clientIp, rateOk } from './_lib.js';
+// An order or a reservation answers with a t.me link: the client opens the bot and gets its statuses there.
+import { redis, hGet, hList, hSave, seq, getItem, notifyAdmins, normPhone, clientIp, rateOk, botName, randomCode } from './_lib.js';
 import { orderText, orderKeyboard, reviewText, reviewKeyboard } from './_shop.js';
 
 const line = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 const block = (v, max) => String(v ?? '').replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim().slice(0, max);
 const CALL_US = 'Позвоните или напишите в WhatsApp: +7 (926) 467-80-00';
+
+// client base by phone: how many times they came before (the card shows «постоянный клиент»)
+async function rememberClient(o) {
+  let c = await hGet('clients', o.phone);
+  if (!c) { // first time since the base exists — pick up their earlier requests
+    const refs = (await hList('orders')).filter((x) => x.phone === o.phone && x.id !== o.id).reverse()
+      .map((x) => ({ t: x.type, id: x.id, at: x.createdAt }));
+    c = { id: o.phone, phone: o.phone, refs, createdAt: refs[0]?.at || o.createdAt };
+  }
+  o.visits = c.refs.length;
+  o.lastVisit = c.refs.length ? c.refs[c.refs.length - 1].at : null;
+  c.refs = [...c.refs, { t: o.type, id: o.id, at: o.createdAt }].slice(-50);
+  c.lastAt = o.createdAt;
+  if (o.name) c.name = o.name;
+  await hSave('clients', c);
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
@@ -48,12 +65,16 @@ export default async function handler(req, res) {
     }
 
     o.id = await seq('orders');
+    o.token = randomCode();
+    await rememberClient(o);
     await hSave('orders', o);
     o.msgs = await notifyAdmins('sendMessage', {
       text: orderText(o), parse_mode: 'HTML', reply_markup: orderKeyboard(o), disable_web_page_preview: true,
     });
     await hSave('orders', o);
-    return res.status(200).json({ ok: true, id: o.id });
+    const bot = await botName().catch(() => '');
+    const track = bot ? `https://t.me/${bot}?start=${o.type === 'reserve' ? 'r' : 'o'}${o.id}_${o.token}` : '';
+    return res.status(200).json({ ok: true, id: o.id, track });
   } catch (e) {
     console.error(e);
     return fail(500, 'Не получилось отправить. ' + CALL_US);
