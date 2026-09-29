@@ -865,6 +865,9 @@
   .rev-who b{display:block; font-family:'Playfair Display', Georgia, serif; font-style:italic; font-weight:500;}
   .rev-who small{display:block; font-size:0.74rem; color:var(--ink-soft); margin-top:2px;}
   .rev-foot{text-align:center; margin-top:30px;}
+  #reviews.is-empty{padding:72px 0;}
+  #reviews.is-empty .section-head{margin-bottom:24px;}
+  #reviews.is-empty .rev-foot{margin-top:0;}
 
   /* order: send straight from the site */
   .site-send{display:grid; gap:10px;}
@@ -926,6 +929,8 @@
     .rev-card{flex:0 0 min(84%, 320px); scroll-snap-align:start; padding:22px 18px 16px;}
     .rev-card:only-child{flex-basis:100%;}
     .rev-foot{margin-top:12px;}
+    #reviews.is-empty{padding:44px 0;}
+    #reviews.is-empty .section-head{margin-bottom:18px;}
     .addr-actions .btn{flex:1 1 auto; padding:13px 14px; font-size:0.66rem; letter-spacing:0.08em;}
     .map-box{height:280px; border-radius:18px;}
     .dlg-card{padding:24px 18px 16px; border-radius:22px;}
@@ -1076,7 +1081,7 @@
     <a href="#services">Услуги</a>
     <a href="#gallery">Работы</a>
     <a href="#order">Собрать букет</a>
-    <a href="#reviews" hidden>Отзывы</a>
+    <a href="#reviews">Отзывы</a>
     <a href="#address">Адрес</a>
     <a href="#contact">Контакты</a>
   </div>
@@ -1269,15 +1274,15 @@
   </div>
 </section>
 
-<section id="reviews" hidden aria-labelledby="revTitle">
+<section id="reviews" class="is-empty" aria-labelledby="revTitle">
   <div class="wrap">
     <div class="section-head reveal">
       <div class="section-eyebrow">Отзывы</div>
-      <h2 id="revTitle">Что говорят клиенты</h2>
-      <p class="rev-summary" id="revSummary"></p>
+      <h2 id="revTitle">Как вам наши цветы?</h2>
+      <p class="rev-summary" id="revSummary">Расскажите о букете — после проверки отзыв появится здесь.</p>
     </div>
     <div class="rev-grid" id="revGrid"></div>
-    <div class="rev-foot"><button type="button" class="btn btn-ghost" data-review>Оставить отзыв</button></div>
+    <div class="rev-foot"><button type="button" class="btn btn-primary" id="revBtn" data-review>Оставить отзыв</button></div>
   </div>
 </section>
 
@@ -1465,7 +1470,7 @@
         <li><a href="#services">Услуги</a></li>
         <li><a href="#gallery">Работы</a></li>
         <li><a href="#order">Собрать букет</a></li>
-        <li><a href="#reviews" hidden>Отзывы</a></li>
+        <li><a href="#reviews">Отзывы</a></li>
       </ul>
     </div>
     <div class="foot-contacts">
@@ -2271,12 +2276,18 @@
   // ---------- reviews ----------
   const revSec = $('#reviews'), revGrid = $('#revGrid');
   function renderReviews(list){
-    revSec.hidden = !list.length;
-    $$('a[href="#reviews"]').forEach(a => a.hidden = !list.length);
     const sig = JSON.stringify(list);
     if(sig === revSec.dataset.sig) return;
     revSec.dataset.sig = sig;
-    if(!list.length) return;
+    const empty = !list.length;
+    revSec.classList.toggle('is-empty', empty);
+    $('#revBtn').className = 'btn ' + (empty ? 'btn-primary' : 'btn-ghost');
+    $('#revTitle').textContent = empty ? 'Как вам наши цветы?' : 'Что говорят клиенты';
+    if(empty){
+      $('#revSummary').textContent = 'Расскажите о букете — после проверки отзыв появится здесь.';
+      revGrid.replaceChildren();
+      return;
+    }
     const avg = list.reduce((s, v) => s + v.rating, 0) / list.length;
     const sum = $('#revSummary');
     sum.replaceChildren(el('b', null, '★ ' + avg.toFixed(1).replace('.', ',')), ' · ' + plural(list.length, ['отзыв', 'отзыва', 'отзывов']) + ' наших клиентов');
