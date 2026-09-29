@@ -17,9 +17,15 @@ export default async function handler(req, res) {
     steps.push(`✓ Бот подключён к ${url}`);
     await tg('setMyCommands', {
       commands: [
-        { command: 'list', description: 'Что сейчас на сайте' },
-        { command: 'help', description: 'Как добавить букет' },
+        { command: 'list', description: 'Что сейчас в наличии' },
+        { command: 'orders', description: 'Открытые заявки с сайта' },
+        { command: 'works', description: 'Портфолио' },
+        { command: 'reviews', description: 'Отзывы' },
+        { command: 'stats', description: 'Статистика' },
+        { command: 'banner', description: 'Объявление на сайте' },
+        { command: 'pause', description: 'Мастерская на паузе' },
         { command: 'channel', description: 'Публикация в Telegram-канал' },
+        { command: 'help', description: 'Как пользоваться ботом' },
       ],
     });
     steps.push('', `Готово! Теперь Ирина открывает @${me.username} и отправляет: /admin <тот же код>`);
